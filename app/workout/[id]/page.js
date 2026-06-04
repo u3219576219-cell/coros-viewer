@@ -44,9 +44,17 @@ function Metric({ label, value }) {
 }
 
 function LineChart({ points, field, title, unit, color = '#22c55e', invert = false }) {
-  const valid = cleanPoints(points)
+  let valid = cleanPoints(points)
     .map((p, i) => ({ ...p, i, value: Number(p[field]) }))
     .filter(p => Number.isFinite(p.value));
+
+  if (field === 'pace') {
+    valid = valid.filter(p => p.value >= 180 && p.value <= 900);
+  }
+
+  if (field === 'hr') {
+    valid = valid.filter(p => p.value >= 40 && p.value <= 220);
+  }
 
   if (valid.length < 2) {
     return (
@@ -57,38 +65,50 @@ function LineChart({ points, field, title, unit, color = '#22c55e', invert = fal
     );
   }
 
-  let values = valid.map(p => p.value);
-
-  values.sort((a, b) => a - b);
-  const low = values[Math.floor(values.length * 0.05)];
-  const high = values[Math.floor(values.length * 0.95)];
-  const min = low ?? Math.min(...values);
-  const maxVal = high ?? Math.max(...values);
+  const values = valid.map(p => p.value).sort((a, b) => a - b);
+  const min = values[Math.floor(values.length * 0.03)];
+  const maxVal = values[Math.floor(values.length * 0.97)];
   const span = maxVal - min || 1;
 
   const sampled = valid.slice(0, 700);
+
+  const yFor = (value) => {
+    const raw = Math.max(min, Math.min(maxVal, value));
+    const yNorm = (raw - min) / span;
+    return invert ? 30 + yNorm * 220 : 250 - yNorm * 220;
+  };
+
   const d = sampled.map((p, i) => {
     const x = (i / (sampled.length - 1)) * 1000;
-    const raw = Math.max(min, Math.min(maxVal, p.value));
-    const yNorm = (raw - min) / span;
-    const y = invert ? 30 + yNorm * 220 : 250 - yNorm * 220;
+    const y = yFor(p.value);
     return `${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`;
   }).join(' ');
 
   const average = avg(valid.map(p => p.value));
   const maximum = max(valid.map(p => p.value));
 
+  const guideValues = [
+    min,
+    min + span * 0.5,
+    maxVal
+  ];
+
+  const showValue = (v) => {
+    if (field === 'pace') return formatPace(v);
+    return Math.round(v);
+  };
+
   return (
     <section className="darkCard">
       <div className="chartHead">
         <h2>{title}</h2>
         <div>
-          <span>Макс. <b>{maximum ? Math.round(maximum) : '--'}</b></span>
-          <span>Средн. <b>{average ? Math.round(average) : '--'}</b></span>
+          <span>Макс. <b>{field === 'pace' ? formatPace(min) : Math.round(maximum)}</b></span>
+          <span>Средн. <b>{field === 'pace' ? formatPace(average) : Math.round(average)}</b></span>
         </div>
       </div>
 
-      <div className="darkChart">
+      <div className="darkChart withGuides">
         <svg viewBox="0 0 1000 280" preserveAspectRatio="none">
           <defs>
             <linearGradient id={`g-${field}`} x1="0" x2="0" y1="0" y2="1">
@@ -96,14 +116,25 @@ function LineChart({ points, field, title, unit, color = '#22c55e', invert = fal
               <stop offset="100%" stopColor={color} stopOpacity="0.03" />
             </linearGradient>
           </defs>
+
+          {guideValues.map((v, idx) => {
+            const y = yFor(v);
+            return (
+              <g key={idx}>
+                <line x1="0" x2="1000" y1={y} y2={y} stroke="#3a3a3a" strokeWidth="2" strokeDasharray="8 8" />
+                <text x="8" y={y - 6} fill="#aaa" fontSize="24">{showValue(v)}</text>
+              </g>
+            );
+          })}
+
           <path d={`${d} L1000 280 L0 280 Z`} fill={`url(#g-${field})`} />
           <path d={d} fill="none" stroke={color} strokeWidth="5" strokeLinecap="round" />
         </svg>
       </div>
 
       <div className="chartFoot">
-        <span>min {Math.round(min)}{unit}</span>
-        <span>max {Math.round(maxVal)}{unit}</span>
+        <span>min {showValue(min)}{field === 'pace' ? '' : unit}</span>
+        <span>max {showValue(maxVal)}{field === 'pace' ? '' : unit}</span>
       </div>
     </section>
   );
