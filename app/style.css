@@ -134,3 +134,42 @@
   }
 }
 
+.darkPage .stat,
+.darkPage .card{
+  background:#171717;
+  color:#f5f5f5;
+  border-color:#2a2a2a;
+  box-shadow:none;
+}
+
+.darkPage .muted{
+  color:#a3a3a3;
+}
+
+.darkPage .chart{
+  background:#111;
+  border-color:#333;
+}
+
+.darkPage{
+  max-width:none;
+  margin:0;
+}
+
+.darkPage .darkCard{
+  overflow:hidden;
+}
+
+.darkPage .zoneRow{
+  font-size:14px;
+}
+
+.darkPage .chartHead h2{
+  font-size:22px;
+}
+
+.darkPage .chartHead{
+  flex-direction:column;
+}
+
+
