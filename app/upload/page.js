@@ -16,7 +16,11 @@ export default function Upload(){
     <form className="uploadBox" onSubmit={submit}>
       <label>Пароль загрузки</label><input name="password" type="password" required />
       <label>Название тренировки, можно оставить пустым</label><input name="title" type="text" placeholder="Например: Бег, Сила, Плавание" />
-      <label>FIT или TCX файл из COROS</label><input name="file" type="file" accept=".fit,.tcx,.xml" required />
+   <label>FIT или TCX файл из COROS</label>
+<label className="filePick">
+  Нажмите, чтобы выбрать файл
+  <input name="file" type="file" accept=".fit,.tcx,.xml,application/octet-stream" required />
+</label>
       <button>Загрузить</button>
       {msg && <div className="notice">{msg}</div>}
     </form>
