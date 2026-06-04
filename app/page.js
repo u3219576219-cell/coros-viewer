@@ -5,7 +5,12 @@ export const dynamic = 'force-dynamic';
 
 export default async function Home(){
   const supabase = publicSupabase();
-  const { data: workouts = [] } = await supabase.from('workouts').select('*').order('started_at',{ascending:false});
+  const { data, error } = await supabase
+  .from('workouts')
+  .select('*')
+  .order('started_at', { ascending: false });
+
+const workouts = data || [];
   const now = new Date();
   const weekAgo = new Date(now); weekAgo.setDate(now.getDate()-7);
   const monthAgo = new Date(now); monthAgo.setDate(now.getDate()-30);
