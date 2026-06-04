@@ -14,3 +14,123 @@
   width:100%;
   margin-top:12px;
 }
+
+.darkPage{
+  min-height:100vh;
+  background:#050505;
+  color:#f5f5f5;
+  padding:20px;
+}
+.backLink{
+  color:#ddd;
+  text-decoration:none;
+  display:block;
+  margin-bottom:18px;
+}
+.darkHero{
+  background:linear-gradient(135deg,#1a1a1a,#050505);
+  border-radius:24px;
+  padding:24px;
+  margin-bottom:16px;
+}
+.darkHero h1{
+  margin:0 0 8px;
+  font-size:32px;
+}
+.darkHero div{
+  color:#aaa;
+  font-size:18px;
+}
+.darkGrid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+  margin-bottom:16px;
+}
+.darkMetric{
+  background:#171717;
+  border-radius:18px;
+  padding:16px;
+}
+.darkMetric div{
+  color:#aaa;
+  font-size:14px;
+}
+.darkMetric b{
+  font-size:26px;
+}
+.darkCard{
+  background:#171717;
+  border-radius:22px;
+  padding:18px;
+  margin:16px 0;
+}
+.darkCard h2{
+  margin:0 0 14px;
+}
+.chartHead{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:flex-start;
+}
+.chartHead div{
+  display:flex;
+  gap:14px;
+  color:#aaa;
+}
+.chartHead b{
+  color:#fff;
+  font-size:24px;
+}
+.darkChart{
+  height:230px;
+  border-top:1px solid #333;
+  border-bottom:1px solid #777;
+  margin-top:12px;
+}
+.darkChart svg{
+  width:100%;
+  height:100%;
+}
+.chartFoot{
+  display:flex;
+  justify-content:space-between;
+  color:#aaa;
+  margin-top:8px;
+}
+.zoneRow{
+  display:grid;
+  grid-template-columns:1.5fr .8fr 1fr .4fr .7fr;
+  gap:8px;
+  align-items:center;
+  margin:12px 0;
+  color:#ddd;
+}
+.zoneRow span{
+  color:#999;
+}
+.bar{
+  height:10px;
+  background:#333;
+  border-radius:999px;
+  overflow:hidden;
+}
+.bar i{
+  display:block;
+  height:100%;
+  background:#22c55e;
+  border-radius:999px;
+}
+@media(max-width:600px){
+  .darkPage{padding:14px}
+  .darkHero h1{font-size:28px}
+  .darkGrid{grid-template-columns:repeat(2,1fr)}
+  .zoneRow{
+    grid-template-columns:1fr;
+    background:#111;
+    padding:12px;
+    border-radius:14px;
+  }
+}
+
