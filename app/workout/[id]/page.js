@@ -18,14 +18,15 @@ function MapMini({points}){
   const d=pts.map((p,i)=>{const x=((Number(p.lon)-minLon)/((maxLon-minLon)||1))*1000; const y=700-((Number(p.lat)-minLat)/((maxLat-minLat)||1))*700; return `${i?'L':'M'}${x.toFixed(1)} ${y.toFixed(1)}`}).join(' ');
   return <><h3>Маршрут</h3><div className="map"><svg viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid meet"><path d={d} fill="none" stroke="currentColor" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round"/></svg></div></>
 }
-export default async function Workout({params}){
-  const supabase=publicSupabase();
-  const id = params?.id;
-const { data: w } = await supabase
-  .from('workouts')
-  .select('*')
-  .eq('id', id)
-  .maybeSingle();
+export default async function Workout({ params }) {
+  const supabase = publicSupabase();
+  const id = params.id;
+
+  const { data: w } = await supabase
+    .from('workouts')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
   if(!w)return <main className="wrap"><div className="card">Тренировка не найдена</div></main>;
   const pace=w.distance_m? w.duration_sec/(w.distance_m/1000):null;
   return <main className="wrap"><a className="muted" href="/">← Все тренировки</a><section className="hero"><h1>{sportIcon(w.sport||w.title)} {w.title||w.sport||'Тренировка'}</h1><div className="muted">{new Date(w.started_at||w.created_at).toLocaleString('ru-RU')}</div></section>
