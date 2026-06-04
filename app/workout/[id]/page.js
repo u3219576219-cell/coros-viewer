@@ -20,7 +20,12 @@ function MapMini({points}){
 }
 export default async function Workout({params}){
   const supabase=publicSupabase();
-  const {data:w}=await supabase.from('workouts').select('*').eq('id',params.id).single();
+  const id = params?.id;
+const { data: w } = await supabase
+  .from('workouts')
+  .select('*')
+  .eq('id', id)
+  .maybeSingle();
   if(!w)return <main className="wrap"><div className="card">Тренировка не найдена</div></main>;
   const pace=w.distance_m? w.duration_sec/(w.distance_m/1000):null;
   return <main className="wrap"><a className="muted" href="/">← Все тренировки</a><section className="hero"><h1>{sportIcon(w.sport||w.title)} {w.title||w.sport||'Тренировка'}</h1><div className="muted">{new Date(w.started_at||w.created_at).toLocaleString('ru-RU')}</div></section>
