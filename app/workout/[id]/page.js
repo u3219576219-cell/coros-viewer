@@ -140,7 +140,7 @@ function LineChart({ points, field, title, unit, color = '#22c55e', invert = fal
             return (
               <g key={`yt-${idx}`}>
                 <line x1="70" x2="1000" y1={y} y2={y} stroke="#343434" strokeWidth="2" />
-                <text x="4" y={y + 8} fill="#a3a3a3" fontSize="24">{showValue(v)}</text>
+                <text x="4" y={y + 8} fill="#a3a3a3" fontSize="16">{showValue(v)}</text>
               </g>
             );
           })}
@@ -148,7 +148,7 @@ function LineChart({ points, field, title, unit, color = '#22c55e', invert = fal
           {xTicks.map((v, idx) => {
             const x = Math.max(70, Math.min(990, xFor(v)));
             return (
-              <text key={`xt-${idx}`} x={x} y="276" fill="#a3a3a3" fontSize="30" textAnchor="middle">
+              <text key={`xt-${idx}`} x={x} y="276" fill="#a3a3a3" fontSize="22" textAnchor="middle">
                 {v}
               </text>
             );
@@ -227,6 +227,18 @@ export default async function Workout({ params }) {
         <h1>{sportIcon(w.sport || title)} {title}</h1>
         <div>{formatDate(w.started_at || w.created_at)}</div>
       </section>
+
+      <pre style={{
+        background: '#111',
+        color: '#22c55e',
+        padding: '12px',
+        borderRadius: '12px',
+        overflow: 'auto',
+        fontSize: '12px',
+        maxHeight: '260px'
+      }}>
+        {JSON.stringify(w.points?.[0], null, 2)}
+      </pre>
 
       <section className="darkGrid">
         <Metric label="Время" value={fmtDuration(w.duration_sec)} />
