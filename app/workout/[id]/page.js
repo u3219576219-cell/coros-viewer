@@ -45,16 +45,21 @@ function Metric({ label, value }) {
 
 function LineChart({ points, field, title, unit, color = '#22c55e', invert = false }) {
   let valid = cleanPoints(points)
-    .map((p, i) => ({ ...p, i, value: Number(p[field]) }))
+    .map((p, i) => {
+      const start = new Date(points?.[0]?.t || p.t).getTime();
+      const current = new Date(p.t).getTime();
+      return {
+        ...p,
+        i,
+        minFromStart: Number.isFinite(current - start) ? (current - start) / 60000 : i / 60,
+        value: Number(p[field])
+      };
+    })
     .filter(p => Number.isFinite(p.value));
 
-  if (field === 'pace') {
-    valid = valid.filter(p => p.value >= 180 && p.value <= 900);
-  }
-
-  if (field === 'hr') {
-    valid = valid.filter(p => p.value >= 40 && p.value <= 220);
-  }
+  if (field === 'pace') valid = valid.filter(p => p.value >= 180 && p.value <= 900);
+  if (field === 'hr') valid = valid.filter(p => p.value >= 40 && p.value <= 220);
+  if (field === 'alt') valid = valid.filter(p => p.value > -500 && p.value < 9000);
 
   if (valid.length < 2) {
     return (
@@ -65,76 +70,88 @@ function LineChart({ points, field, title, unit, color = '#22c55e', invert = fal
     );
   }
 
+  const durationMin = Math.max(...valid.map(p => p.minFromStart));
   const values = valid.map(p => p.value).sort((a, b) => a - b);
-  const min = values[Math.floor(values.length * 0.03)];
-  const maxVal = values[Math.floor(values.length * 0.97)];
-  const span = maxVal - min || 1;
 
-  const sampled = valid.slice(0, 700);
+  const minVal = values[Math.floor(values.length * 0.03)];
+  const maxVal = values[Math.floor(values.length * 0.97)];
+  const span = maxVal - minVal || 1;
+
+  const average = avg(valid.map(p => p.value));
+  const maximum = max(valid.map(p => p.value));
+  const bestPace = field === 'pace' ? minVal : maximum;
 
   const yFor = (value) => {
-    const raw = Math.max(min, Math.min(maxVal, value));
-    const yNorm = (raw - min) / span;
-    return invert ? 30 + yNorm * 220 : 250 - yNorm * 220;
+    const raw = Math.max(minVal, Math.min(maxVal, value));
+    const yNorm = (raw - minVal) / span;
+    return invert ? 34 + yNorm * 200 : 234 - yNorm * 200;
   };
 
+  const xFor = (minute) => {
+    return durationMin ? (minute / durationMin) * 1000 : 0;
+  };
+
+  const sampled = valid.filter((_, i) => i % Math.ceil(valid.length / 700) === 0);
+
   const d = sampled.map((p, i) => {
-    const x = (i / (sampled.length - 1)) * 1000;
+    const x = xFor(p.minFromStart);
     const y = yFor(p.value);
     return `${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`;
   }).join(' ');
 
-  const average = avg(valid.map(p => p.value));
-  const maximum = max(valid.map(p => p.value));
-
-  const guideValues = [
-    min,
-    min + span * 0.5,
-    maxVal
-  ];
-
   const showValue = (v) => {
+    if (!Number.isFinite(v)) return '--';
     if (field === 'pace') return formatPace(v);
     return Math.round(v);
   };
+
+  const xTicks = [0, 10, 20, 30, Math.round(durationMin)].filter((v, i, arr) => {
+    return v <= durationMin + 1 && arr.indexOf(v) === i;
+  });
+
+  const yTicks = [maxVal, (maxVal + minVal) / 2, minVal];
 
   return (
     <section className="darkCard">
       <div className="chartHead">
         <h2>{title}</h2>
         <div>
-          <span>Макс. <b>{field === 'pace' ? formatPace(min) : Math.round(maximum)}</b></span>
-          <span>Средн. <b>{field === 'pace' ? formatPace(average) : Math.round(average)}</b></span>
+          <span>{field === 'pace' ? 'Лучший' : 'Макс.'} <b>{showValue(bestPace)}</b></span>
+          <span>Средн. <b>{showValue(average)}</b></span>
         </div>
       </div>
 
       <div className="darkChart withGuides">
-        <svg viewBox="0 0 1000 280" preserveAspectRatio="none">
+        <svg viewBox="0 0 1000 300" preserveAspectRatio="none">
           <defs>
             <linearGradient id={`g-${field}`} x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor={color} stopOpacity="0.45" />
-              <stop offset="100%" stopColor={color} stopOpacity="0.03" />
+              <stop offset="0%" stopColor={color} stopOpacity="0.42" />
+              <stop offset="100%" stopColor={color} stopOpacity="0.04" />
             </linearGradient>
           </defs>
 
-          {guideValues.map((v, idx) => {
+          {yTicks.map((v, idx) => {
             const y = yFor(v);
             return (
-              <g key={idx}>
-                <line x1="0" x2="1000" y1={y} y2={y} stroke="#3a3a3a" strokeWidth="2" strokeDasharray="8 8" />
-                <text x="8" y={y - 6} fill="#aaa" fontSize="24">{showValue(v)}</text>
+              <g key={`y-${idx}`}>
+                <line x1="0" x2="1000" y1={y} y2={y} stroke="#3a3a3a" strokeWidth="2" />
+                <text x="0" y={y - 8} fill="#aaa" fontSize="24">{showValue(v)}</text>
               </g>
             );
           })}
 
-          <path d={`${d} L1000 280 L0 280 Z`} fill={`url(#g-${field})`} />
-          <path d={d} fill="none" stroke={color} strokeWidth="5" strokeLinecap="round" />
-        </svg>
-      </div>
+          {xTicks.map((v, idx) => {
+            const x = xFor(v);
+            return (
+              <text key={`x-${idx}`} x={x} y="292" fill="#aaa" fontSize="28" textAnchor={idx === 0 ? 'start' : 'middle'}>
+                {v}
+              </text>
+            );
+          })}
 
-      <div className="chartFoot">
-        <span>min {showValue(min)}{field === 'pace' ? '' : unit}</span>
-        <span>max {showValue(maxVal)}{field === 'pace' ? '' : unit}</span>
+          <path d={`${d} L${xFor(durationMin).toFixed(1)} 260 L0 260 Z`} fill={`url(#g-${field})`} />
+          <path d={d} fill="none" stroke={color} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
       </div>
     </section>
   );
