@@ -19,6 +19,16 @@ function MapMini({points}){
   return <><h3>Маршрут</h3><div className="map"><svg viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid meet"><path d={d} fill="none" stroke="currentColor" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round"/></svg></div></>
 }
 export default async function Workout({ params }) {
+
+  return (
+    <main className="wrap">
+      <pre>{JSON.stringify(params, null, 2)}</pre>
+    </main>
+  );
+
+  const supabase = publicSupabase();
+  ...
+}
   const supabase = publicSupabase();
   const id = params.id;
 
