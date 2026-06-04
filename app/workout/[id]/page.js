@@ -48,53 +48,58 @@ function LineChart({ points, field, title, unit, color = '#22c55e', invert = fal
     .map((p, i) => {
       const start = new Date(points?.[0]?.t || p.t).getTime();
       const current = new Date(p.t).getTime();
+
       return {
         ...p,
         i,
-        minFromStart: Number.isFinite(current - start) ? (current - start) / 60000 : i / 60,
+        minute: Number.isFinite(current - start) ? (current - start) / 60000 : i / 60,
         value: Number(p[field])
       };
     })
     .filter(p => Number.isFinite(p.value));
 
-  if (field === 'pace') valid = valid.filter(p => p.value >= 180 && p.value <= 900);
+  if (field === 'pace') valid = valid.filter(p => p.value >= 210 && p.value <= 720);
   if (field === 'hr') valid = valid.filter(p => p.value >= 40 && p.value <= 220);
   if (field === 'alt') valid = valid.filter(p => p.value > -500 && p.value < 9000);
 
   if (valid.length < 2) {
     return (
-      <section className="darkCard">
+      <section className="darkCard corosChartCard">
         <h2>{title}</h2>
         <div className="muted">Нет данных</div>
       </section>
     );
   }
 
-  const durationMin = Math.max(...valid.map(p => p.minFromStart));
+  const durationMin = Math.max(...valid.map(p => p.minute));
   const values = valid.map(p => p.value).sort((a, b) => a - b);
 
-  const minVal = values[Math.floor(values.length * 0.03)];
-  const maxVal = values[Math.floor(values.length * 0.97)];
-  const span = maxVal - minVal || 1;
+  let minVal = values[Math.floor(values.length * 0.02)];
+  let maxVal = values[Math.floor(values.length * 0.98)];
 
+  if (field === 'pace') {
+    minVal = Math.max(210, minVal);
+    maxVal = Math.min(720, maxVal);
+  }
+
+  const span = maxVal - minVal || 1;
   const average = avg(valid.map(p => p.value));
   const maximum = max(valid.map(p => p.value));
-  const bestPace = field === 'pace' ? minVal : maximum;
+  const best = field === 'pace' ? minVal : maximum;
+
+  const xFor = (minute) => durationMin ? (minute / durationMin) * 1000 : 0;
 
   const yFor = (value) => {
     const raw = Math.max(minVal, Math.min(maxVal, value));
-    const yNorm = (raw - minVal) / span;
-    return invert ? 34 + yNorm * 200 : 234 - yNorm * 200;
+    const norm = (raw - minVal) / span;
+    return invert ? 34 + norm * 196 : 230 - norm * 196;
   };
 
-  const xFor = (minute) => {
-    return durationMin ? (minute / durationMin) * 1000 : 0;
-  };
-
-  const sampled = valid.filter((_, i) => i % Math.ceil(valid.length / 700) === 0);
+  const sampleStep = Math.max(1, Math.ceil(valid.length / 650));
+  const sampled = valid.filter((_, i) => i % sampleStep === 0);
 
   const d = sampled.map((p, i) => {
-    const x = xFor(p.minFromStart);
+    const x = xFor(p.minute);
     const y = yFor(p.value);
     return `${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`;
   }).join(' ');
@@ -105,51 +110,55 @@ function LineChart({ points, field, title, unit, color = '#22c55e', invert = fal
     return Math.round(v);
   };
 
-  const xTicks = [0, 10, 20, 30, Math.round(durationMin)].filter((v, i, arr) => {
-    return v <= durationMin + 1 && arr.indexOf(v) === i;
-  });
-
+  const avgY = yFor(average);
   const yTicks = [maxVal, (maxVal + minVal) / 2, minVal];
 
+  const rawTicks = [0, 10, 20, 30, Math.round(durationMin)];
+  const xTicks = rawTicks.filter((v, i, arr) => v <= durationMin + 1 && arr.indexOf(v) === i);
+
   return (
-    <section className="darkCard">
-      <div className="chartHead">
+    <section className="darkCard corosChartCard">
+      <div className="corosChartHeader">
         <h2>{title}</h2>
-        <div>
-          <span>{field === 'pace' ? 'Лучший' : 'Макс.'} <b>{showValue(bestPace)}</b></span>
+        <div className="corosChartNumbers">
+          <span>{field === 'pace' ? 'Лучший' : 'Макс.'} <b>{showValue(best)}</b></span>
           <span>Средн. <b>{showValue(average)}</b></span>
         </div>
       </div>
 
-      <div className="darkChart withGuides">
-        <svg viewBox="0 0 1000 300" preserveAspectRatio="none">
+      <div className="corosChart">
+        <svg viewBox="0 0 1000 285" preserveAspectRatio="none">
           <defs>
-            <linearGradient id={`g-${field}`} x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor={color} stopOpacity="0.42" />
-              <stop offset="100%" stopColor={color} stopOpacity="0.04" />
+            <linearGradient id={`fill-${field}`} x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stopColor={color} stopOpacity="0.36" />
+              <stop offset="100%" stopColor={color} stopOpacity="0.02" />
             </linearGradient>
           </defs>
 
           {yTicks.map((v, idx) => {
             const y = yFor(v);
             return (
-              <g key={`y-${idx}`}>
-                <line x1="0" x2="1000" y1={y} y2={y} stroke="#3a3a3a" strokeWidth="2" />
-                <text x="0" y={y - 8} fill="#aaa" fontSize="24">{showValue(v)}</text>
+              <g key={`yt-${idx}`}>
+                <line x1="70" x2="1000" y1={y} y2={y} stroke="#343434" strokeWidth="2" />
+                <text x="4" y={y + 8} fill="#a3a3a3" fontSize="24">{showValue(v)}</text>
               </g>
             );
           })}
 
           {xTicks.map((v, idx) => {
-            const x = xFor(v);
+            const x = Math.max(70, Math.min(990, xFor(v)));
             return (
-              <text key={`x-${idx}`} x={x} y="292" fill="#aaa" fontSize="28" textAnchor={idx === 0 ? 'start' : 'middle'}>
+              <text key={`xt-${idx}`} x={x} y="276" fill="#a3a3a3" fontSize="30" textAnchor="middle">
                 {v}
               </text>
             );
           })}
 
-          <path d={`${d} L${xFor(durationMin).toFixed(1)} 260 L0 260 Z`} fill={`url(#g-${field})`} />
+          {Number.isFinite(avgY) && (
+            <line x1="70" x2="1000" y1={avgY} y2={avgY} stroke="#ef4444" strokeWidth="3" strokeDasharray="7 7" />
+          )}
+
+          <path d={`${d} L1000 246 L70 246 Z`} fill={`url(#fill-${field})`} />
           <path d={d} fill="none" stroke={color} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </div>
