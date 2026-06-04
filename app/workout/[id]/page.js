@@ -1,32 +1,4 @@
-import { publicSupabase } from '../../../lib/supabase';
-import { fmtDuration, fmtDistance, fmtPace, sportIcon } from '../../../lib/format';
-
-export const dynamic = 'force-dynamic';
-
-function LineChart({ points, field, label }) {
-  const vals = (points || []).map(p => Number(p[field])).filter(v => Number.isFinite(v));
-  if (vals.length < 2) return <div className="notice">Нет данных для графика: {label}</div>;
-
-  const min = Math.min(...vals);
-  const max = Math.max(...vals);
-  const span = max - min || 1;
-  const sampled = (points || []).filter(p => Number.isFinite(Number(p[field]))).slice(0, 600);
-
-  const d = sampled.map((p, i) => {
-    const x = (i / (sampled.length - 1)) * 1000;
-    const y = 160 - ((Number(p[field]) - min) / span) * 130;
-    return `${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`;
-  }).join(' ');
-
-  return (
-    <div>
-      <h3>{label}</h3>
-      <div className="chart">
-        <svg viewBox="0 0 1000 180" preserveAspectRatio="none">
-          <path d={d} fill="none" stroke="currentColor" strokeWidth="4" />
-        </svg>
-      </div>
-      <div className="muted small">min {Math.round(min)} · max {Math.round(max)}</div>
+ted small">min {Math.round(min)} · max {Math.round(max)}</div>
     </div>
   );
 }
@@ -96,9 +68,9 @@ export default async function Workout({ params }) {
         <div className="stat"><span className="muted">Время</span><b>{fmtDuration(w.duration_sec)}</b></div>
         <div className="stat"><span className="muted">Дистанция</span><b>{fmtDistance(w.distance_m)}</b></div>
         <div className="stat"><span className="muted">Темп</span><b>{fmtPace(pace)}</b></div>
-        <div className="stat"><span className="muted">Пульс</span><b>{w.avg_hr ? Math.round(w.avg_hr) : '—'}</b></div>
-        <div className="stat"><span className="muted">Нагрузка</span><b>{Math.round(w.load_score) || '—'}</b></div>
-        <div className="stat"><span className="muted">Калории</span><b>{Math.round(w.calories) || '—'}</b></div>
+        <div className="stat"><span className="muted">Пульс</span><b>{w.avg_hr ? Math.round(w.avg_hr) : '--'}</b></div>
+        <div className="stat"><span className="muted">Нагрузка</span><b>{Math.round(w.load_score) || '--'}</b></div>
+        <div className="stat"><span className="muted">Калории</span><b>{Math.round(w.calories) || '--'}</b></div>
       </section>
 
       <section className="card" style={{ marginTop: 16 }}>
