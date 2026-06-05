@@ -81,8 +81,20 @@ async function parseFit(buffer) {
   );
 
   const records = fit.records || fit.activity?.records || [];
-  const sessions = fit.sessions || fit.activity?.sessions || [];
-  const session = sessions[0] || {};
+const sessions = fit.sessions || fit.activity?.sessions || [];
+const session = sessions[0] || {};
+
+console.log('FIT RECORD SAMPLE 0');
+console.log(records[0]);
+
+console.log('FIT RECORD SAMPLE 50');
+console.log(records[50]);
+
+console.log('FIT SESSION SAMPLE');
+console.log(session);
+
+let last = null;
+let dist = 0;
 
   let last = null;
   let dist = 0;
