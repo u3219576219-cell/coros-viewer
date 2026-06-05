@@ -237,19 +237,11 @@ export default async function Workout({ params }) {
         fontSize: '12px',
         maxHeight: '260px'
       }}>
-       {JSON.stringify(
-  points.find(
-    p =>
-      p.cadence ||
-      p.power ||
-      p.temperature ||
-      p.ground_time ||
-      p.stride_length ||
-      p.vertical_ratio ||
-      p.vertical_oscillation
-  ) ||
-    points[50] ||
-    points[0],
+     {JSON.stringify(
+  points.find(p => p.power || p.temperature || p.cadence) ||
+  points.find(p => p.stride_length) ||
+  points[50] ||
+  points[0],
   null,
   2
 )}
