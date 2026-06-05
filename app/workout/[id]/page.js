@@ -215,7 +215,9 @@ export default async function Workout({ params }) {
   const hrs = points.map(p => Number(p.hr)).filter(Number.isFinite);
   const avgHr = w.avg_hr || avg(hrs);
   const maxHr = w.max_hr || max(hrs);
-
+const avgPower = avg(points.map(p => p.power));
+const avgCadence = avg(points.map(p => p.cadence));
+const avgStride = avg(points.map(p => p.stride_length));
   const title = w.title || w.sport || 'Тренировка';
   const pace = w.distance_m ? w.duration_sec / (w.distance_m / 1000) : null;
 
@@ -228,24 +230,7 @@ export default async function Workout({ params }) {
         <div>{formatDate(w.started_at || w.created_at)}</div>
       </section>
 
-      <pre style={{
-        background: '#111',
-        color: '#22c55e',
-        padding: '12px',
-        borderRadius: '12px',
-        overflow: 'auto',
-        fontSize: '12px',
-        maxHeight: '260px'
-      }}>
-     {JSON.stringify(
-  points.find(p => p.power || p.temperature || p.cadence) ||
-  points.find(p => p.stride_length) ||
-  points[50] ||
-  points[0],
-  null,
-  2
-)}
-      </pre>
+   
 
       <section className="darkGrid">
         <Metric label="Время" value={fmtDuration(w.duration_sec)} />
@@ -255,6 +240,20 @@ export default async function Workout({ params }) {
         <Metric label="Макс. пульс" value={maxHr ? Math.round(maxHr) : '--'} />
         <Metric label="Нагрузка" value={Math.round(w.load_score) || '--'} />
         <Metric label="Калории" value={Math.round(w.calories) || '--'} />
+        <Metric
+  label="Мощность"
+  value={avgPower ? `${Math.round(avgPower)} Вт` : '--'}
+/>
+
+<Metric
+  label="Каденс"
+  value={avgCadence ? `${Math.round(avgCadence * 2)} spm` : '--'}
+/>
+
+<Metric
+  label="Длина шага"
+  value={avgStride ? `${Math.round(avgStride / 10)} см` : '--'}
+/>
       </section>
 
       <LineChart points={points} field="pace" title="Темп (мин/км)" unit="" color="#22c55e" invert />
