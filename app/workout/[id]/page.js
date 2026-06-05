@@ -246,22 +246,9 @@ const chartPoints = points.map(p => ({
         <Metric label="Темп" value={formatPace(pace)} />
         <Metric label="Средний пульс" value={avgHr ? Math.round(avgHr) : '--'} />
         <Metric label="Макс. пульс" value={maxHr ? Math.round(maxHr) : '--'} />
-        <Metric label="Нагрузка" value={Math.round(w.load_score) || '--'} />
+
         <Metric label="Калории" value={Math.round(w.calories) || '--'} />
-        <Metric
-  label="Мощность"
-  value={avgPower ? `${Math.round(avgPower)} Вт` : '--'}
-/>
-
-<Metric
-  label="Каденс"
-  value={avgCadence ? `${Math.round(avgCadence * 2)} spm` : '--'}
-/>
-
-<Metric
-  label="Длина шага"
-  value={avgStride ? `${Math.round(avgStride / 10)} см` : '--'}
-/>
+        
       </section>
 
     <LineChart points={points} field="pace" title="Темп (мин/км)" unit="" color="#22c55e" invert />
