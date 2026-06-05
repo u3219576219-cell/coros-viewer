@@ -82,8 +82,7 @@ async function parseFit(buffer) {
 
   const records = fit.records || fit.activity?.records || [];
   
-  console.log('FIT RECORD SAMPLE');
-console.log(JSON.stringify(records[100], null, 2));
+  throw new Error(JSON.stringify(records[100], null, 2));
 const sessions = fit.sessions || fit.activity?.sessions || [];
 const session = sessions[0] || {};
 
