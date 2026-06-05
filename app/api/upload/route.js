@@ -82,7 +82,6 @@ async function parseFit(buffer) {
 
   const records = fit.records || fit.activity?.records || [];
   
-  throw new Error(JSON.stringify(records[100], null, 2));
 const sessions = fit.sessions || fit.activity?.sessions || [];
 const session = sessions[0] || {};
 
@@ -138,20 +137,22 @@ console.log(session);
       ),
 
       ground_time: toNumberOrNull(
-        r.ground_contact_time
-      ),
+  r.ground_contact_time ??
+  r.stance_time
+),
 
-      stride_length: toNumberOrNull(
-        r.stride_length
-      ),
+stride_length: toNumberOrNull(
+  r.stride_length ??
+  r.step_length
+),
 
-      vertical_ratio: toNumberOrNull(
-        r.vertical_ratio
-      ),
+vertical_ratio: toNumberOrNull(
+  r.vertical_ratio
+),
 
-      vertical_oscillation: toNumberOrNull(
-        r.vertical_oscillation
-      ),
+vertical_oscillation: toNumberOrNull(
+  r.vertical_oscillation
+),
 
       lat: Number.isFinite(lat) ? lat : null,
       lon: Number.isFinite(lon) ? lon : null,
