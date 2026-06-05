@@ -61,6 +61,9 @@ function LineChart({ points, field, title, unit, color = '#22c55e', invert = fal
   if (field === 'pace') valid = valid.filter(p => p.value >= 210 && p.value <= 720);
   if (field === 'hr') valid = valid.filter(p => p.value >= 40 && p.value <= 220);
   if (field === 'alt') valid = valid.filter(p => p.value > -500 && p.value < 9000);
+  if (field === 'cadence_spm') valid = valid.filter(p => p.value > 0);
+if (field === 'stride_cm') valid = valid.filter(p => p.value > 0);
+if (field === 'power') valid = valid.filter(p => p.value > 0);
 
   if (valid.length < 2) {
     return (
@@ -221,6 +224,11 @@ const avgStride = avg(points.map(p => p.stride_length));
   const title = w.title || w.sport || 'Тренировка';
   const pace = w.distance_m ? w.duration_sec / (w.distance_m / 1000) : null;
 
+const chartPoints = points.map(p => ({
+  ...p,
+  cadence_spm: p.cadence ? p.cadence * 2 : null,
+  stride_cm: p.stride_length ? p.stride_length / 10 : null
+}));
   return (
     <main className="darkPage">
       <a className="backLink" href="/">← Все тренировки</a>
@@ -256,10 +264,15 @@ const avgStride = avg(points.map(p => p.stride_length));
 />
       </section>
 
-      <LineChart points={points} field="pace" title="Темп (мин/км)" unit="" color="#22c55e" invert />
-      <LineChart points={points} field="hr" title="Пульс (уд/мин)" unit="" color="#22c55e" />
-      <HeartZones points={points} />
-      <LineChart points={points} field="alt" title="Высота" unit=" м" color="#f97316" />
+    <LineChart points={points} field="pace" title="Темп (мин/км)" unit="" color="#22c55e" invert />
+<LineChart points={points} field="hr" title="Пульс (уд/мин)" unit="" color="#22c55e" />
+<HeartZones points={points} />
+
+<LineChart points={chartPoints} field="cadence_spm" title="Каденс" unit="" color="#22d3ee" />
+<LineChart points={chartPoints} field="stride_cm" title="Длина шага (см)" unit="" color="#8b5cf6" />
+<LineChart points={points} field="power" title="Мощность (Вт)" unit="" color="#f97316" />
+
+<LineChart points={points} field="alt" title="Высота" unit=" м" color="#06b6d4" />
     </main>
   );
 }
