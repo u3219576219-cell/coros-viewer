@@ -266,12 +266,12 @@ const chartPoints = points.map(p => ({
 
     <LineChart points={points} field="pace" title="Темп (мин/км)" unit="" color="#22c55e" invert />
 <LineChart points={points} field="hr" title="Пульс (уд/мин)" unit="" color="#22c55e" />
-<HeartZones points={points} />
+
 
 <LineChart points={chartPoints} field="cadence_spm" title="Каденс" unit="" color="#22d3ee" />
 <LineChart points={chartPoints} field="stride_cm" title="Длина шага (см)" unit="" color="#8b5cf6" />
 <LineChart points={points} field="power" title="Мощность (Вт)" unit="" color="#f97316" />
-
+<HeartZones points={points} />
 <LineChart points={points} field="alt" title="Высота" unit=" м" color="#06b6d4" />
     </main>
   );
