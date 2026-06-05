@@ -96,9 +96,6 @@ console.log(records[50]);
 console.log('FIT SESSION SAMPLE');
 console.log(session);
 
-let last = null;
-let dist = 0;
-
   let last = null;
   let dist = 0;
 
